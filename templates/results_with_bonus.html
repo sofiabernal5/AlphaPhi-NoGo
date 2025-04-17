@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requirements Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .category-section {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .category-title {
+            color: #0d6efd;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .sample-section {
+            margin-top: 2rem;
+            background-color: #e9ecef;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+        .bonus-used {
+            color: #198754;
+            font-weight: bold;
+        }
+        .unique-member {
+            border-left: 4px solid #0d6efd;
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        .category-detail {
+            margin-left: 1rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background-color: rgba(13, 110, 253, 0.05);
+            border-radius: 4px;
+            border-left: 3px solid #6c757d;
+        }
+        .member-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #212529;
+        }
+        .senior-badge {
+            background-color: #6f42c1;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+        .seniors-section {
+            background-color: #e2f0d9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .below-threshold {
+            background-color: #f8d7da;
+        }
+        .met-threshold {
+            background-color: #d1e7dd;
+        }
+        .search-box {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Requirements Analysis Results</h1>
+        
+        <div class="d-flex justify-content-between mb-4">
+            <a href="/" class="btn btn-secondary">Back to Upload</a>
+            
+            <form action="/export_results" method="post">
+                <input type="hidden" name="sisterhood_data" value="{{ sisterhood_results }}">
+                <input type="hidden" name="character_data" value="{{ character_results }}">
+                <input type="hidden" name="generosity_data" value="{{ generosity_results }}">
+                <input type="hidden" name="innovation_data" value="{{ innovation_results }}">
+                <input type="hidden" name="potential_seniors" value="{{ potential_seniors }}">
+                <input type="hidden" name="confirmed_seniors" value="{{ confirmed_seniors }}">
+                <input type="hidden" name="unique_members_data" value="{{ unique_members }}">
+                <input type="hidden" name="full_member_list" value="{{ full_member_list }}">
+                <button type="submit" class="btn btn-success">Export Results</button>
+            </form>
+        </div>
+        
+        <!-- Thresholds Summary -->
+        <div class="alert alert-info mb-4">
+            <h5>Applied Thresholds:</h5>
+            <ul class="mb-0">
+                <li>Sisterhood: {{ sisterhood_threshold }}</li>
+                <li>Character: {{ character_threshold }}</li>
+                <li>Generosity: {{ generosity_threshold }}</li>
+                <li>Innovation: {{ innovation_threshold }}</li>
+            </ul>
+        </div>
+        
+        <!-- Column Mappings Used -->
+        <div class="alert alert-secondary mb-4">
+            <h5>Column Mappings:</h5>
+            <ul class="mb-0">
+                <li>Last Name: Column {{ column_mappings['Last Name'] }}</li>
+                <li>First Name: Column {{ column_mappings['First Name'] }}</li>
+                <li>Sisterhood: Column {{ column_mappings.Sisterhood }}</li>
+                <li>Character: Column {{ column_mappings.Character }}</li>
+                <li>Generosity: Column {{ column_mappings.Generosity }}</li>
+                <li>Innovation: Column {{ column_mappings.Innovation }}</li>
+                <li>Bonus: Column {{ column_mappings.Bonus }}</li>
+                <li>Total: Column {{ column_mappings.Total }}</li>
+            </ul>
+            <p class="mt-2 mb-0">Total Members Processed: {{ total_members }}</p>
+        </div>
+        
+        <div class="alert alert-success mb-4">
+            <h5>Single Category Bonus Point Allocation:</h5>
+            <p class="mb-0">Bonus points are allocated to the single category where they are most needed based on how far below the threshold that category is.</p>
+        </div>
+        
+        <!-- Confirmed Seniors Section -->
+        {% if confirmed_seniors %}
+            <div class="seniors-section">
+                <h3 class="category-title">Confirmed Seniors ({{ confirmed_seniors|length }})</h3>
+                <p>The following members are identified as seniors and are exempted from all requirements:</p>
+                <div class="row">
+                    {% for senior in confirmed_seniors %}
+                        <div class="col-md-4 mb-2">
+                            <span class="badge bg-purple">{{ senior }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Unique Members List -->
+        <div class="category-section">
+            <h3 class="category-title">Members Below Threshold</h3>
+            {% if unique_members %}
+                <p>The following members are below threshold in at least one category. Seniors are excluded from this list.</p>
+                
+                {% for member in unique_members %}
+                    <div class="unique-member">
+                        <div class="member-name">{{ member.name }}</div>
+                        <div class="mt-2">
+                            <span class="badge bg-primary">Bonus Points: {{ member.bonus }}</span>
+                            {% if member.bonus_category %}
+                                <span class="badge bg-success">Allocated to: {{ member.bonus_category|capitalize }}</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mt-2">
+                            <strong>Categories below threshold:</strong>
+                            {% for category in member.categories %}
+                                <div class="category-detail">
+                                    <div><strong>{{ category.name }}:</strong></div>
+                                    <div>Current: {{ category.current }} / Threshold: {{ category.threshold }}</div>
+                                    {% if category.has_bonus %}
+                                        <div>With Bonus: <span class="bonus-used">{{ category.with_bonus }}</span></div>
+                                    {% endif %}
+                                    <div>Still Missing: {{ category.missing }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-success">All non-senior members meet all thresholds!</p>
+            {% endif %}
+        </div>
+        
+        <!-- Sisterhood Results -->
+        <div class="category-section">
+            <h3 class="category-title">Sisterhood Results</h3>
+            {% if sisterhood_results %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Current Points</th>
+                                <th>With Bonus</th>
+                                <th>Bonus Used</th>
+                                <th>Still Missing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for person in sisterhood_results %}
+                                <tr>
+                                    <td><strong>{{ person.name }}</strong></td>
+                                    <td>{{ person.current }}</td>
+                                    <td>{{ person.new_total }}</td>
+                                    <td class="bonus-used">{% if person.bonus_used > 0 %}+{{ person.bonus_used }}{% else %}0{% endif %}</td>
+                                    <td>{{ person.missing }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-success">All non-senior members meet the Sisterhood threshold!</p>
+            {% endif %}
+        </div>
+        
+        <!-- Character Results -->
+        <div class="category-section">
+            <h3 class="category-title">Character Results</h3>
+            {% if character_results %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Current Points</th>
+                                <th>With Bonus</th>
+                                <th>Bonus Used</th>
+                                <th>Still Missing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for person in character_results %}
+                                <tr>
+                                    <td><strong>{{ person.name }}</strong></td>
+                                    <td>{{ person.current }}</td>
+                                    <td>{{ person.new_total }}</td>
+                                    <td class="bonus-used">{% if person.bonus_used > 0 %}+{{ person.bonus_used }}{% else %}0{% endif %}</td>
+                                    <td>{{ person.missing }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-success">All non-senior members meet the Character threshold!</p>
+            {% endif %}
+        </div>
+        
+        <!-- Generosity Results -->
+        <div class="category-section">
+            <h3 class="category-title">Generosity Results</h3>
+            {% if generosity_results %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Current Points</th>
+                                <th>With Bonus</th>
+                                <th>Bonus Used</th>
+                                <th>Still Missing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for person in generosity_results %}
+                                <tr>
+                                    <td><strong>{{ person.name }}</strong></td>
+                                    <td>{{ person.current }}</td>
+                                    <td>{{ person.new_total }}</td>
+                                    <td class="bonus-used">{% if person.bonus_used > 0 %}+{{ person.bonus_used }}{% else %}0{% endif %}</td>
+                                    <td>{{ person.missing }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-success">All non-senior members meet the Generosity threshold!</p>
+            {% endif %}
+        </div>
+        
+        <!-- Innovation Results -->
+        <div class="category-section">
+            <h3 class="category-title">Innovation Results</h3>
+            {% if innovation_results %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Current Points</th>
+                                <th>With Bonus</th>
+                                <th>Bonus Used</th>
+                                <th>Still Missing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for person in innovation_results %}
+                                <tr>
+                                    <td><strong>{{ person.name }}</strong></td>
+                                    <td>{{ person.current }}</td>
+                                    <td>{{ person.new_total }}</td>
+                                    <td class="bonus-used">{% if person.bonus_used > 0 %}+{{ person.bonus_used }}{% else %}0{% endif %}</td>
+                                    <td>{{ person.missing }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-success">All non-senior members meet the Innovation threshold!</p>
+            {% endif %}
+        </div>
+        
+        <!-- Potential Seniors -->
+        <div class="category-section">
+            <h3 class="category-title">Potential Seniors</h3>
+            {% if potential_seniors %}
+                <p>The following members have a zero value in one or more categories and might be seniors (but aren't in the seniors list):</p>
+                <ul>
+                    {% for person in potential_seniors %}
+                        <li>{{ person }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-success">No potential seniors identified.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Full Member List -->
+        
+        <!-- Full Member List -->
+        <div class="category-section">
+            <h3 class="category-title">Complete Member List</h3>
+            
+            <div class="search-box">
+                <div class="input-group">
+                    <input type="text" id="memberSearch" class="form-control" placeholder="Search for a member...">
+                    <button class="btn btn-outline-secondary" type="button" onclick="filterMembers()">Search</button>
+                    <button class="btn btn-outline-secondary" type="button" onclick="resetFilter()">Reset</button>
+                </div>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="showBelowThresholdOnly" onchange="filterBelowThreshold()">
+                    <label class="form-check-label" for="showBelowThresholdOnly">
+                        Show only members below threshold
+                    </label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <span class="badge below-threshold p-2 me-2">Below Threshold</span>
+                <span class="badge met-threshold p-2 me-2">Meets Threshold</span>
+                <span class="senior-badge me-2">Senior (Exempt)</span>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-bordered" id="memberTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Below Threshold?</th>
+                            <th>Sisterhood</th>
+                            <th>Character</th>
+                            <th>Generosity</th>
+                            <th>Innovation</th>
+                            <th>Bonus</th>
+                            <th>Allocation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in full_member_list %}
+                            {% set any_below = member.sisterhood_below or member.character_below or member.generosity_below or member.innovation_below %}
+                            {% set any_still_below = (member.sisterhood_with_bonus < member.sisterhood_threshold) or 
+                                                    (member.character_with_bonus < member.character_threshold) or 
+                                                    (member.generosity_with_bonus < member.generosity_threshold) or 
+                                                    (member.innovation_with_bonus < member.innovation_threshold) %}
+                            <tr class="{% if any_still_below and not member.senior %}below-threshold-row{% endif %}">
+                                <td><strong>{{ member.name }}</strong></td>
+                                <td>
+                                    {% if member.senior %}
+                                        <span class="senior-badge">SENIOR</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Active</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if member.senior %}
+                                        <span class="text-muted">Exempt</span>
+                                    {% elif any_still_below %}
+                                        <span class="badge bg-danger">Yes</span>
+                                    {% else %}
+                                        <span class="badge bg-success">No</span>
+                                    {% endif %}
+                                </td>
+                                <td class="{% if member.sisterhood_below and not member.senior %}below-threshold{% elif not member.senior %}met-threshold{% endif %}">
+                                    {{ member.sisterhood }}
+                                    {% if member.sisterhood != member.sisterhood_with_bonus %}
+                                        <span class="bonus-used"> → {{ member.sisterhood_with_bonus }}</span>
+                                    {% endif %}
+                                    <br/>
+                                    <small>Threshold: {{ member.sisterhood_threshold }}</small>
+                                    {% if member.sisterhood_with_bonus < member.sisterhood_threshold and not member.senior %}
+                                        <br/><span class="badge bg-danger">Below</span>
+                                    {% endif %}
+                                </td>
+                                <td class="{% if member.character_below and not member.senior %}below-threshold{% elif not member.senior %}met-threshold{% endif %}">
+                                    {{ member.character }}
+                                    {% if member.character != member.character_with_bonus %}
+                                        <span class="bonus-used"> → {{ member.character_with_bonus }}</span>
+                                    {% endif %}
+                                    <br/>
+                                    <small>Threshold: {{ member.character_threshold }}</small>
+                                    {% if member.character_with_bonus < member.character_threshold and not member.senior %}
+                                        <br/><span class="badge bg-danger">Below</span>
+                                    {% endif %}
+                                </td>
+                                <td class="{% if member.generosity_below and not member.senior %}below-threshold{% elif not member.senior %}met-threshold{% endif %}">
+                                    {{ member.generosity }}
+                                    {% if member.generosity != member.generosity_with_bonus %}
+                                        <span class="bonus-used"> → {{ member.generosity_with_bonus }}</span>
+                                    {% endif %}
+                                    <br/>
+                                    <small>Threshold: {{ member.generosity_threshold }}</small>
+                                    {% if member.generosity_with_bonus < member.generosity_threshold and not member.senior %}
+                                        <br/><span class="badge bg-danger">Below</span>
+                                    {% endif %}
+                                </td>
+                                <td class="{% if member.innovation_below and not member.senior %}below-threshold{% elif not member.senior %}met-threshold{% endif %}">
+                                    {{ member.innovation }}
+                                    {% if member.innovation != member.innovation_with_bonus %}
+                                        <span class="bonus-used"> → {{ member.innovation_with_bonus }}</span>
+                                    {% endif %}
+                                    <br/>
+                                    <small>Threshold: {{ member.innovation_threshold }}</small>
+                                    {% if member.innovation_with_bonus < member.innovation_threshold and not member.senior %}
+                                        <br/><span class="badge bg-danger">Below</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ member.bonus }}</td>
+                                <td>
+                                    {% if member.bonus_category and not member.senior %}
+                                        <span class="bonus-used">{{ member.bonus_category|capitalize }}</span>
+                                    {% elif member.senior %}
+                                        <span class="text-muted">N/A</span>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function filterMembers() {
+            const input = document.getElementById('memberSearch');
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById('memberTable');
+            const tr = table.getElementsByTagName('tr');
+            
+            for (let i = 1; i < tr.length; i++) {
+                const td = tr[i].getElementsByTagName('td')[0]; // Name column
+                if (td) {
+                    const txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = '';
+                    } else {
+                        tr[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+        
+        function resetFilter() {
+            const input = document.getElementById('memberSearch');
+            input.value = '';
+            
+            const table = document.getElementById('memberTable');
+            const tr = table.getElementsByTagName('tr');
+            
+            for (let i = 1; i < tr.length; i++) {
+                tr[i].style.display = '';
+            }
+        }
+    </script>
+</body>
+</html>

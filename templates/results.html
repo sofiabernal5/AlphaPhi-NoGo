@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requirements Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .category-section {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .category-title {
+            color: #0d6efd;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .sample-section {
+            margin-top: 2rem;
+            background-color: #e9ecef;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Requirements Analysis Results</h1>
+        
+        <div class="d-flex justify-content-between mb-4">
+            <a href="/" class="btn btn-secondary">Back to Upload</a>
+            
+            <form action="/export_results" method="post">
+                <input type="hidden" name="sisterhood_data" value="{{ sisterhood_results }}">
+                <input type="hidden" name="character_data" value="{{ character_results }}">
+                <input type="hidden" name="generosity_data" value="{{ generosity_results }}">
+                <input type="hidden" name="innovation_data" value="{{ innovation_results }}">
+                <input type="hidden" name="potential_seniors" value="{{ potential_seniors }}">
+                <button type="submit" class="btn btn-success">Export Results</button>
+            </form>
+        </div>
+        
+        <!-- Thresholds Summary -->
+        <div class="alert alert-info mb-4">
+            <h5>Applied Thresholds:</h5>
+            <ul class="mb-0">
+                <li>Sisterhood: {{ sisterhood_threshold }}</li>
+                <li>Character: {{ character_threshold }}</li>
+                <li>Generosity: {{ generosity_threshold }}</li>
+                <li>Innovation: {{ innovation_threshold }}</li>
+            </ul>
+        </div>
+        
+        <!-- Column Mappings Used -->
+        <div class="alert alert-secondary mb-4">
+            <h5>Column Mappings:</h5>
+            <ul class="mb-0">
+                <li>Sheet: {{ column_mappings.Sheet }}</li>
+                <li>Last Name: {{ column_mappings['Last Name'] }}</li>
+                <li>First Name: {{ column_mappings['First Name'] }}</li>
+                <li>Sisterhood: {{ column_mappings.Sisterhood }}</li>
+                <li>Character: {{ column_mappings.Character }}</li>
+                <li>Generosity: {{ column_mappings.Generosity }}</li>
+                <li>Innovation: {{ column_mappings.Innovation }}</li>
+                <li>Bonus: {{ column_mappings.Bonus }}</li>
+                <li>Total: {{ column_mappings.Total }}</li>
+            </ul>
+            <p class="mt-2 mb-0">Total Members Processed: {{ total_members }}</p>
+        </div>
+        
+        <!-- Sisterhood Results -->
+        <div class="category-section">
+            <h3 class="category-title">Sisterhood Results</h3>
+            {% if sisterhood_results %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Current Points</th>
+                                <th>With Bonus</th>
+                                <th>Missing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for person in sisterhood_results %}
+                                <tr>
+                                    <td><strong>{{ person.name }}</strong></td>
+                                    <td>{{ person.current }}</td>
+                                    <td>{{ person.new_total }}</td>
+                                    <td>{{ person.missing }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-success">All members meet the Sisterhood threshold!</p>
+            {% endif %}
+        </div>
+        
+        <!-- Character Results -->
+        <div class="category-section">
+            <h3 class="category-title">Character Results</h3>
+            {% if character_results %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Current Points</th>
+                                <th>With Bonus</th>
+                                <th>Missing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for person in character_results %}
+                                <tr>
+                                    <td>{{ person.name }}</td>
+                                    <td>{{ person.current }}</td>
+                                    <td>{{ person.new_total }}</td>
+                                    <td>{{ person.missing }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-success">All members meet the Character threshold!</p>
+            {% endif %}
+        </div>
+        
+        <!-- Generosity Results -->
+        <div class="category-section">
+            <h3 class="category-title">Generosity Results</h3>
+            {% if generosity_results %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Current Points</th>
+                                <th>With Bonus</th>
+                                <th>Missing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for person in generosity_results %}
+                                <tr>
+                                    <td>{{ person.name }}</td>
+                                    <td>{{ person.current }}</td>
+                                    <td>{{ person.new_total }}</td>
+                                    <td>{{ person.missing }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-success">All members meet the Generosity threshold!</p>
+            {% endif %}
+        </div>
+        
+        <!-- Innovation Results -->
+        <div class="category-section">
+            <h3 class="category-title">Innovation Results</h3>
+            {% if innovation_results %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Current Points</th>
+                                <th>With Bonus</th>
+                                <th>Missing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for person in innovation_results %}
+                                <tr>
+                                    <td>{{ person.name }}</td>
+                                    <td>{{ person.current }}</td>
+                                    <td>{{ person.new_total }}</td>
+                                    <td>{{ person.missing }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-success">All members meet the Innovation threshold!</p>
+            {% endif %}
+        </div>
+        
+        <!-- Potential Seniors -->
+        <div class="category-section">
+            <h3 class="category-title">Potential Seniors</h3>
+            {% if potential_seniors %}
+                <p>The following members have a zero value in one or more categories and might be seniors:</p>
+                <ul>
+                    {% for person in potential_seniors %}
+                        <li>{{ person }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-success">No potential seniors identified.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Sample Members -->
+        <div class="sample-section">
+            <h3 class="mb-3">Sample of Members (First 10)</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Sisterhood</th>
+                            <th>Character</th>
+                            <th>Generosity</th>
+                            <th>Innovation</th>
+                            <th>Bonus</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in sample_members %}
+                            <tr>
+                                <td>{{ member.name }}</td>
+                                <td>{{ member.sisterhood }}</td>
+                                <td>{{ member.character }}</td>
+                                <td>{{ member.generosity }}</td>
+                                <td>{{ member.innovation }}</td>
+                                <td>{{ member.bonus }}</td>
+                                <td>{{ member.total }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
