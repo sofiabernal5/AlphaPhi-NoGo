@@ -24,12 +24,13 @@
             border-radius: 8px;
             margin-bottom: 1.5rem;
         }
+        
     </style>
 </head>
 <body>
     <div class="container">
         <div class="form-container">
-            <h1 class="text-center mb-4">Member Requirements Tracker</h1>
+            <h1 class="text-center mb-4">Member No Go Calculator</h1>
             
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
@@ -62,25 +63,25 @@
                 </div>
                 
                 <div class="requirements-section">
-                    <h4 class="mb-3">Requirement Thresholds</h4>
+                    <h4 class="mb-3">Point requirements</h4>
                     
                     <div class="mb-3">
-                        <label for="sisterhood_threshold" class="form-label">Sisterhood Threshold</label>
+                        <label for="sisterhood_threshold" class="form-label">Sisterhood Requirement</label>
                         <input type="number" class="form-control" id="sisterhood_threshold" name="sisterhood_threshold" value="30" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="character_threshold" class="form-label">Character Threshold</label>
+                        <label for="character_threshold" class="form-label">Character Requirement</label>
                         <input type="number" class="form-control" id="character_threshold" name="character_threshold" value="23" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="generosity_threshold" class="form-label">Generosity Threshold</label>
+                        <label for="generosity_threshold" class="form-label">Generosity Requirement</label>
                         <input type="number" class="form-control" id="generosity_threshold" name="generosity_threshold" value="10" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="innovation_threshold" class="form-label">Innovation Threshold</label>
+                        <label for="innovation_threshold" class="form-label">Innovation Requirement</label>
                         <input type="number" class="form-control" id="innovation_threshold" name="innovation_threshold" value="10" required>
                     </div>
                 </div>

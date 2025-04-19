@@ -6,7 +6,7 @@ import tempfile
 import numpy as np
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Required for flashing messages
+app.secret_key = 'Martha1872'  # Required for flashing messages
 
 # Configure upload folder
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
